@@ -1,0 +1,41 @@
+---
+
+- hosts: redis_nodes
+
+  vars:
+
+  pre_tasks:
+
+    - name: "Run pre-tasks"
+      import_role:
+        name: pre-tasks
+
+    - name: Install Docker
+      import_role:
+        name: geerlingguy.docker
+
+  tasks:
+
+    - name: Start Redis
+      import_role:
+        name: geerlingguy.redis
+
+    - name: Start Postresql
+      import_role:
+        name: geerlingguy.postgresql
+
+    - import_role:
+        name: nextcloud
+        tasks_from: configure
+      tags:
+        - nextcloud
+        - configuration
+
+    - import_role:
+        name: nextcloud
+        tasks_from: container
+      environment:
+        NOMAD_ADDR: "http://{{ ansible_default_ipv4.address }}:4646"
+      tags:
+        - nextcloud
+        - services
