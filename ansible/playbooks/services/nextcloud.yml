@@ -7,14 +7,6 @@
 
   pre_tasks:
 
-    # - name: "Run pre-tasks"
-    #   import_role:
-    #     name: pre-tasks
-
-    - name: Install Docker
-      import_role:
-        name: geerlingguy.docker
-
   tasks:
 
     - name: Create nextcloud data volume
@@ -29,8 +21,8 @@
           # POSTGRES_DB: nextcloud
           # POSTGRES_USER: nextcloud
           POSTGRES_PASSWORD: 'n#xtcl0ud'
-          POSTGRES_HOST: 127.0.0.1
-          REDIS_HOST: 127.0.0.1
+          POSTGRES_HOST: 172.0.0.1
+          REDIS_HOST: 172.0.0.1
           REDIS_HOST_PORT : 6379
         state: present
         recreate: yes

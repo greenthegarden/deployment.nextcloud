@@ -17,10 +17,10 @@
       software-properties-common,
     ]
 
-    # python_modules: [
-    #   { name: netaddr },
-    #   { name: python-consul }
-    # ]
+    python_modules: [
+      { name: netaddr },
+      { name: python-consul }
+    ]
 
   tasks:
 

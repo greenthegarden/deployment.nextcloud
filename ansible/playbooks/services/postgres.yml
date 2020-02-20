@@ -1,19 +1,10 @@
 ---
 
-- hosts: nextcloud_instances
+- hosts: postgres_instances
 
   vars:
-    nextcloud_network: nextcloud_network
 
   pre_tasks:
-
-    # - name: "Run pre-tasks"
-    #   import_role:
-    #     name: pre-tasks
-
-    - name: Install Docker
-      import_role:
-        name: geerlingguy.docker
 
   tasks:
 
