@@ -10,7 +10,9 @@
       sshpass,
       unzip,
       curl,
-      git
+      git,
+      apt-transport-https,
+      ca-certificates,
     ]
 
     # python_modules: [
