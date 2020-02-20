@@ -1,6 +1,6 @@
 ---
 
-- hosts: redis_nodes
+- hosts: redis_instances
 
   vars:
 

@@ -1,6 +1,6 @@
 ---
 
-- hosts: nextcloud_nodes
+- hosts: nextcloud_instances
 
   vars:
     nextcloud_network: nextcloud_network
