@@ -9,10 +9,12 @@
   tasks:
 
     - name: Create postgres data volume
+      become: yes
       docker_volume:
         name: postgres_data
 
     - name: Start postgres container
+      become: yes
       docker_container:
         name: postgres
         image: postgres

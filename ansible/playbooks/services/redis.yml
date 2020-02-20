@@ -9,10 +9,12 @@
   tasks:
 
     - name: Create redis volume
+      become: yes
       docker_volume:
         name: redis_data
 
     - name: Start redis container
+      become: yes
       docker_container:
         name: redis
         image: redis

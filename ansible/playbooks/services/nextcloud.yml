@@ -10,10 +10,12 @@
   tasks:
 
     - name: Create nextcloud data volume
+      become: yes
       docker_volume:
         name: nextcloud_data
 
     - name: Start nextcloud container
+      become: yes
       docker_container:
         name: nextcloud
         image: nextcloud
