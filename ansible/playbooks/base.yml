@@ -1,0 +1,42 @@
+---
+
+- hosts: all
+
+  vars:
+
+    packages: [
+      python3-apt,
+      python3-pip,
+      sshpass,
+      unzip,
+      curl,
+      git
+    ]
+
+    # python_modules: [
+    #   { name: netaddr },
+    #   { name: python-consul }
+    # ]
+
+  tasks:
+
+    - name: Update host packages
+      import_role:
+        name: greenthegarden.configure-host
+        tasks_from: run-package-update
+      run_once: yes
+      tags:
+        - base
+        - update
+
+    - name: Install dependencies
+      import_role:
+        name: greenthegarden.configure-host
+        tasks_from: install-dependencies
+      tags:
+        - base
+        - dependencies
+
+    - name: Install Docker
+      import_role:
+        name: geerlingguy.docker

@@ -1,7 +1,7 @@
 ---
 
-# # Ensure all host tasks are performed first, set of common tasks
-# - import_playbook: playbooks/home-monitoring-nodes.yml
+# Ensure all host tasks are performed first, set of common tasks
+- import_playbook: playbooks/base.yml
 # # Run role to install and configure Consul on hosts specified as consul_instances
 # - import_playbook: playbooks/services/consul.yml
 # Run role to install and set up the Prometheus node exporter on ALL hosts
