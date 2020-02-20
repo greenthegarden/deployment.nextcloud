@@ -1,14 +1,14 @@
 ---
 
-# Ensure all host tasks are performed first, set of common tasks
-- import_playbook: playbooks/home-monitoring-nodes.yml
-# Run role to install and configure Consul on hosts specified as consul_instances
-- import_playbook: playbooks/services/consul.yml
+# # Ensure all host tasks are performed first, set of common tasks
+# - import_playbook: playbooks/home-monitoring-nodes.yml
+# # Run role to install and configure Consul on hosts specified as consul_instances
+# - import_playbook: playbooks/services/consul.yml
 # Run role to install and set up the Prometheus node exporter on ALL hosts
 # - import_playbook: playbooks/services/node-exporter.yml
 # Run role to install and set up the Redis on hosts specified as redis_instances
 - import_playbook: playbooks/services/redis.yml
-# Run role to install and set up the Prometheus node exporter on ALL hosts
-# - import_playbook: playbooks/services/node-exporter.yml
-# Run role to install and set up the Prometheus node exporter on ALL hosts
-# - import_playbook: playbooks/services/node-exporter.yml
+# Run role to install and set up Postgres on hosts specified as postgres_instances
+- import_playbook: playbooks/services/postgres.yml
+# Run role to install and set up Nextcloud on hosts specified as nextcloud_instances
+- import_playbook: playbooks/services/nextcloud.yml
