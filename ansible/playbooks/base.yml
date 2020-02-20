@@ -25,6 +25,7 @@
   tasks:
 
     - name: Update host packages
+      become: yes
       import_role:
         name: greenthegarden.configure-host
         tasks_from: run-package-update
@@ -34,6 +35,7 @@
         - update
 
     - name: Install dependencies
+      become: yes
       import_role:
         name: greenthegarden.configure-host
         tasks_from: install-dependencies
@@ -42,5 +44,6 @@
         - dependencies
 
     - name: Install Docker
+      become: yes
       import_role:
         name: geerlingguy.docker
