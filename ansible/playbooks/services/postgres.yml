@@ -20,7 +20,7 @@
         image: postgres
         env:
           POSTGRES_PASSWORD: 'n#xtcl0ud'
-        state: present
+        state: started
         recreate: yes
         exposed_ports:
           - 5432

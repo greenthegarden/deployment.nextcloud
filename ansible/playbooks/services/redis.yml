@@ -19,7 +19,7 @@
         name: redis
         image: redis
         command: redis-server --appendonly yes
-        state: present
+        state: started
         recreate: yes
         exposed_ports:
           - 6379
