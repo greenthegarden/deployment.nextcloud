@@ -23,6 +23,8 @@
       { name: python-consul },
     ]
 
+    docker_install_compose: no
+
   tasks:
 
     - name: Update host packages
@@ -48,3 +50,4 @@
       become: yes
       import_role:
         name: geerlingguy.docker
+      when: ansible_
