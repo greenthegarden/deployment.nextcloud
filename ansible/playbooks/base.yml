@@ -50,10 +50,10 @@
       become: yes
       import_role:
         name: geerlingguy.docker
-      when: ansible_architecture.find('v=' ~ 'arm') != -1
+      when: ansible_architecture is not search('arm')
 
-    - name: Install Docker
+    - name: Install Docker for ARM
       become: yes
       import_role:
         name: geerlingguy.docker_arm
-      when: ansible_architecture.find('v=' ~ 'arm') == -1
+      when: ansible_architecture is search('arm')
