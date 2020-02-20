@@ -18,8 +18,9 @@
     ]
 
     python_modules: [
+      { name: docker },
       { name: netaddr },
-      { name: python-consul }
+      { name: python-consul },
     ]
 
   tasks:
