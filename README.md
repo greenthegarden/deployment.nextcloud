@@ -91,3 +91,5 @@ network={
     id_str="SOME_DESCRIPTIVE_NAME"
 }
 ```
+
+Need to use a host-only adaptor network when using VirtualBox manually

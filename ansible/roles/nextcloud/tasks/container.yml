@@ -1,5 +1,10 @@
 ---
 
+- name: Create environmental file
+  template:
+    src: env.j2
+    dest: "/tmp/nextcloud.env"
+
 - name: "deregister {{ nextcloud.service.name }} service with the local consul agent"
   consul:
     service_name: "{{ nextcloud.service.name }}-{{ item.value }}"
@@ -12,10 +17,7 @@
   docker_container:
     name: "{{ nextcloud.service.name }}"
     image: "{{ nextcloud.image.name }}:{{ nextcloud.image.tag }}"
-    # env:
-    #   VIRTUAL_HOST: 'nextcloud.local'
-    #   LETSENCRYPT_HOST: 'nextcloud.local'
-    #   LETSENCRYPT_EMAIL: 'greenthegarden@gmail.com'
+    env_file: "/tmp/nextcloud.env"
     # networks:
     #   - name: "{{ nextcloud_network }}"
     published_ports:

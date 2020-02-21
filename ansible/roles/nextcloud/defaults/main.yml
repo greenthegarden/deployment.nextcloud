@@ -12,7 +12,7 @@ nextcloud_user_name: nextcloud
 nextcloud_group_name: nextcloud
 
 nextcloud_service_name: nextcloud
-nextcloud_service_ports_http: 80
+nextcloud_service_ports_http: 8080
 
 nextcloud_image_name: nextcloud
 nextcloud_image_tag: latest

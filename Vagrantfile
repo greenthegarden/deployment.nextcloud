@@ -166,7 +166,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     controller_node.vm.provision :ansible_local do |ansible|
 
       ansible.install_mode = "pip"
-      ansible.version = "2.9.2"
+      ansible.version = "2.9.5"
       ansible.compatibility_mode = "2.0"
       ansible.install = true
       ansible.limit = "all"
