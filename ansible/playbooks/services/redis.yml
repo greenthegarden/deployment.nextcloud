@@ -4,24 +4,27 @@
 
   vars:
 
+    redis_volume_data: redis_data
+
   pre_tasks:
 
   tasks:
 
-    - name: Create redis volume
+    - name: Create volume for Redis container data
       become: yes
       docker_volume:
-        name: redis_data
+        name: "{{ redis_volume_data }}"
+        state: present
 
-    - name: Start redis container
+    - name: Start Redis container
       become: yes
       docker_container:
         name: redis
         image: redis
         command: redis-server --appendonly yes
-        state: started
-        recreate: yes
-        ports:
+        published_ports :
           - 6379:6379
+        recreate: yes
+        state: started
         volumes:
-          - redis_data:/data
+          - "{{ redis_volume_data }}:/data"

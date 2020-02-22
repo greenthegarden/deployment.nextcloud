@@ -10,5 +10,7 @@
 - import_playbook: playbooks/services/redis.yml
 # Run role to install and set up Postgres on hosts specified as postgres_instances
 - import_playbook: playbooks/services/postgres.yml
+# Run role to install and set up pgAdmin on hosts specified as postgres_instances
+- import_playbook: playbooks/services/pgadmin.yml
 # Run role to install and set up Nextcloud on hosts specified as nextcloud_instances
 - import_playbook: playbooks/services/nextcloud.yml

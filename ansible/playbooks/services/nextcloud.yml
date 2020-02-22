@@ -3,32 +3,35 @@
 - hosts: nextcloud_instances
 
   vars:
+
     nextcloud_network: nextcloud_network
+    nextcloud_volume_data: nextcloud_data
+    nextcloud_env_file: /tmp/nextcloud.env
 
   pre_tasks:
 
   tasks:
 
-    - name: Create nextcloud data volume
+    - name: Create environmental file
+      template:
+        src: "{{ playbook_dir }}/templates/nextcloud.env.j2"
+        dest: "{{ nextcloud_env_file }}"
+
+    - name: Create volume for Nextcloud container data
       become: yes
       docker_volume:
-        name: nextcloud_data
+        name: "{{ nextcloud_volume_data }}"
+        state: present
 
-    - name: Start nextcloud container
+    - name: Start Nextcloud container
       become: yes
       docker_container:
         name: nextcloud
         image: nextcloud
-        env:
-          # POSTGRES_DB: nextcloud
-          # POSTGRES_USER: nextcloud
-          POSTGRES_PASSWORD: 'n#xtcl0ud'
-          POSTGRES_HOST: "{{ ansible_host }}"
-          REDIS_HOST: "{{ ansible_host }}"
-          REDIS_HOST_PORT : '6379'
-        state: started
-        recreate: yes
-        ports:
+        env_file: "{{ nextcloud_env_file }}"
+        published_ports:
           - 8080:80
+        recreate: yes
+        state: started
         volumes:
-          - nextcloud_data:/var/www/html/
+          - "{{ nextcloud_volume_data }}:/var/www/html"

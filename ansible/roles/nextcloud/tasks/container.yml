@@ -26,12 +26,12 @@
     state: started
     volumes:
       - nextcloud:/var/www/html
-      - "{{ nextcloud.storage }}/config:/var/www/html/config"
-      - "{{ nextcloud.storage }}/custom_apps:/var/www/html/custom_apps"
-      - "{{ nextcloud.storage }}/data:/var/www/html/data"
-      - "{{ nextcloud.storage }}/themes:/var/www/html/themes"
+      # - "{{ nextcloud.storage }}/config:/var/www/html/config"
+      # - "{{ nextcloud.storage }}/custom_apps:/var/www/html/custom_apps"
+      # - "{{ nextcloud.storage }}/data:/var/www/html/data"
+      # - "{{ nextcloud.storage }}/themes:/var/www/html/themes"
       - /etc/localtime:/etc/localtime:ro
-      - "{{ nextcloud.storage }}:/var/www/html"
+      # - "{{ nextcloud.storage }}:/var/www/html"
 
 - name: "register {{ nextcloud.service.name }} service with the local consul agent"
   consul:

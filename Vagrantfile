@@ -20,10 +20,12 @@ else
 end
 
 # Get settings from configuration file to enable easier access
+run_use = config_file['configs']['use']
+project_name = config_file['configs']['project']
+services_node_count = config_file['configs']['services_node_count']
 controller_node_settings = config_file['configs'][config_file['configs']['use']]['controller_node']
 services_node_settings = config_file['configs'][config_file['configs']['use']]['services_node']
 vb_settings = config_file['configs'][config_file['configs']['use']]['vb']
-services_node_count = config_file['configs']['services_node_count']
 
 # Define references which do not change with names
 controller_node_base = "controller-node"

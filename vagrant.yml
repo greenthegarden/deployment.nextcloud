@@ -2,9 +2,11 @@
 
 configs:
 
-  services_node_count: 1
-
   use: 'test'
+
+  project: 'nextcloud'
+  
+  services_node_count: 1
 
   test:
     vb:
@@ -30,7 +32,7 @@ configs:
   deployment:
     vb:
       ip_range: 172.16.1
-      ip_netmask: 255.255.255.0
+      ip_netmask: 255.255.0.0
     controller_node:
       name: "controller-node"
       vb:

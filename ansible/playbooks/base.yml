@@ -1,6 +1,6 @@
 ---
 
-- hosts: all
+- hosts: services_nodes
 
   vars:
 
@@ -45,6 +45,21 @@
       tags:
         - base
         - dependencies
+
+    - name: Install Consul
+      become: yes
+      import_role:
+        name: brianshumate.consul
+
+    # - name: Install node-exporter
+    #   become: yes
+    #   import_role:
+    #     name: cloudalchemy.node-exporter
+
+    # - name: Install prometheus
+    #   become: yes
+    #   import_role:
+    #     name: cloudalchemy.prometheus
 
     - name: Install Docker
       become: yes

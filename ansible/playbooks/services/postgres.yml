@@ -4,25 +4,32 @@
 
   vars:
 
+
+    postgres_maintenance_db: postgres
+    postrgres_volume_data: postgres_data
+
   pre_tasks:
 
   tasks:
 
-    - name: Create postgres data volume
+    - name: Create volume for PostgreSQL container data
       become: yes
       docker_volume:
-        name: postgres_data
+        name: "{{ postrgres_volume_data }}"
+        state: present
 
-    - name: Start postgres container
+    - name: Start PostgreSQL container
       become: yes
       docker_container:
         name: postgres
         image: postgres
         env:
-          POSTGRES_PASSWORD: 'n#xtcl0ud'
-        state: started
+          POSTGRES_PASSWORD: "{{ nextcloud_password }}"
+          POSTGRES_USER: "{{ postgres_admin_user }}"
+          POSTGRES_DB: "{{ postgres_maintenance_db }}"
+        published_ports:
+          - 5432:5432
         recreate: yes
-        exposed_ports:
-          - 5432
+        state: started
         volumes:
-          - postgres_data:/var/lib/postgresql/data
+          - "{{ postrgres_volume_data }}:/var/lib/postgresql/data"
