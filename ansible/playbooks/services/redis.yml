@@ -7,6 +7,7 @@
   vars:
 
     redis_volume_data: redis_data
+    redis_volume_recreate: always # one of: always, never or options-changed
 
     redis_service_name: redis
     redis_service_ports_http: 6379
@@ -23,25 +24,32 @@
 
     - name: "Unregister {{ redis_service_name }} service with the local consul agent"
       consul:
-        host: "{{ ansible_host }}"
+        host: "{{ consul_client_address }}"
         service_name: "{{ redis_service_name }}-{{ item.value }}"
         service_port: "{{ item.value | int }}"
-        service_address: "{{ ansible_host }}"
+        # service_address: "{{ ansible_host }}"
         state: absent
       loop: "{{ redis_service_ports }}"
       when: service_consul_running
+
+    - name: Remove Redis container
+      become: yes
+      docker_container:
+        name: "{{ redis_service_name }}"
+        state: absent
+      when: redis_volume_recreate != 'never'
 
     - name: Create volume for Redis container data
       become: yes
       docker_volume:
         name: "{{ redis_volume_data }}"
-        force: yes
+        recreate: "{{ redis_volume_recreate }}"
         state: present
 
     - name: Start Redis container
       become: yes
       docker_container:
-        name: redis
+        name: "{{ redis_service_name }}"
         image: redis
         command: redis-server --appendonly yes
         published_ports :
@@ -53,10 +61,10 @@
 
     - name: "Register {{ redis_service_name }} service with the local consul agent"
       consul:
-        host: "{{ ansible_host }}"
+        host: "{{ consul_client_address }}"
         service_name: "{{ redis_service_name }}-{{ item.value }}"
         service_port: "{{ item.value | int }}"
-        service_address: "{{ ansible_host }}"
+        # service_address: "{{ ansible_host }}"
         state: present
       loop: "{{ redis_service_ports }}"
       when: service_consul_running

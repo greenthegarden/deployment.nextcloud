@@ -27,16 +27,16 @@ all:
 
     # consul_datacenter: nextcloud
     consul_iface: eth1
-    consul_recursors: ['172.16.1.254']
-    consul_dnsmasq_servers: ['/dc1/172.16.1.254']
+    # consul_recursors: ['172.16.1.254']
+    # consul_dnsmasq_servers: ['/dc1/172.16.1.254']
     consul_join_wan: ['172.16.1.101']
     consul_advertise_address_wan: '172.16.1.101'
-    # consul_client_address: "{{ ansible_host }}"
+    consul_client_address: "{{ ansible_host }}"
     consul_dnsmasq_enable: yes
     consul_connect_enabled: yes
     consul_version: '1.7.1'
-    consul_install_upgrade: yes
-    
+    # consul_install_upgrade: yes
+
   children:
 
     services_nodes:
