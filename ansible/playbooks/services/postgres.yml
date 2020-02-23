@@ -1,21 +1,53 @@
 ---
 
-- hosts: postgres_instances
+- name: Install and configure PostgrSQL and pgAdmin on nodes within the postgres_instances group
+
+  hosts: postgres_instances
 
   vars:
 
-
     postgres_maintenance_db: postgres
     postrgres_volume_data: postgres_data
+
+    postgres_service_name: postgres
+    postgres_service_ports_http: 5432
+    postgres_service_ports: [
+      { label: http, value: "{{ postgres_service_ports_http }}" }
+    ]
+
+    postgres_image_name: postgres
+    postgres_image_tag: latest
+
+    deploy_pgadmin: yes
+    
+    pgadmin_service_name: pgadmin
+    pgadmin_service_ports_http: 8888
+    pgadmin_service_ports: [
+      { label: http, value: "{{ pgadmin_service_ports_http }}" }
+    ]
+
+    pgadmin_image_name: dpage/pgadmin4
+    pgadmin_image_tag: latest
 
   pre_tasks:
 
   tasks:
 
+    - name: "Unregister {{ postgres_service_name }} service with the local consul agent"
+      consul:
+        host: "{{ ansible_host }}"
+        service_name: "{{ postgres_service_name }}-{{ item.value }}"
+        service_port: "{{ item.value | int }}"
+        service_address: "{{ ansible_host }}"
+        state: absent
+      loop: "{{ postgres_service_ports }}"
+      when: service_consul_running
+
     - name: Create volume for PostgreSQL container data
       become: yes
       docker_volume:
         name: "{{ postrgres_volume_data }}"
+        force: yes
         state: present
 
     - name: Start PostgreSQL container
@@ -24,7 +56,7 @@
         name: postgres
         image: postgres
         env:
-          POSTGRES_PASSWORD: "{{ nextcloud_password }}"
+          POSTGRES_PASSWORD: "{{ postgres_admin_password }}"
           POSTGRES_USER: "{{ postgres_admin_user }}"
           POSTGRES_DB: "{{ postgres_maintenance_db }}"
         published_ports:
@@ -33,3 +65,51 @@
         state: started
         volumes:
           - "{{ postrgres_volume_data }}:/var/lib/postgresql/data"
+
+    - name: "Register {{ postgres_service_name }} service with the local consul agent"
+      consul:
+        host: "{{ ansible_host }}"
+        service_name: "{{ postgres_service_name }}-{{ item.value }}"
+        service_port: "{{ item.value }}"
+        service_address: "{{ ansible_host }}"
+        state: present
+      loop: "{{ postgres_service_ports }}"
+      when: service_consul_running
+
+    - name: Start pgAdmin container when set
+      block:
+
+        - name: "Unregister {{ pgadmin_service_name }} service with the local consul agent"
+          consul:
+            host: "{{ ansible_host }}"
+            service_name: "{{ pgadmin_service_name }}-{{ item.value }}"
+            service_port: "{{ item.value }}"
+            service_address: "{{ ansible_host }}"
+            state: absent
+          loop: "{{ pgadmin_service_ports }}"
+          when: service_consul_running
+
+        - name: Start pgAdmin container
+          become: yes
+          docker_container:
+            name: pgadmin
+            image: dpage/pgadmin4
+            env:
+              PGADMIN_DEFAULT_EMAIL: "{{ postgres_admin_user }}@mynextcloud.com"
+              PGADMIN_DEFAULT_PASSWORD: "{{ postgres_admin_password }}"
+            published_ports:
+              - 8888:80
+            recreate: yes
+            state: started
+
+        - name: "Register {{ pgadmin_service_name }} service with the local consul agent"
+          consul:
+            host: "{{ ansible_host }}"
+            service_name: "{{ pgadmin_service_name }}-{{ item.value }}"
+            service_port: "{{ item.value | int }}"
+            service_address: "{{ ansible_host }}"
+            state: present
+          loop: "{{ pgadmin_service_ports }}"
+          when: service_consul_running
+
+      when: deploy_pgadmin

@@ -1,6 +1,7 @@
 ---
 
 postgres_admin_user: postgres
+postgres_admin_password: n#xtcl0ud
 
 nextcloud_database: nextcloud
 nextcloud_password: n#xtcl0ud

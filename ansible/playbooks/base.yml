@@ -1,6 +1,8 @@
 ---
 
-- hosts: services_nodes
+- name: Configure nodes within the service_nodes group
+
+  hosts: services_nodes
 
   vars:
 
@@ -15,6 +17,7 @@
       ca-certificates,
       gnupg2,
       software-properties-common,
+      dnsutils,
     ]
 
     python_modules: [
@@ -25,7 +28,7 @@
 
     docker_install_compose: no
 
-  tasks:
+  pre_tasks:
 
     - name: Update host packages
       become: yes
@@ -46,7 +49,9 @@
         - base
         - dependencies
 
-    - name: Install Consul
+  tasks:
+
+    - name: Install, configure and start Hashicorp Consul
       become: yes
       import_role:
         name: brianshumate.consul
@@ -61,13 +66,13 @@
     #   import_role:
     #     name: cloudalchemy.prometheus
 
-    - name: Install Docker
+    - name: Install, configure and start Docker
       become: yes
       import_role:
         name: geerlingguy.docker
       when: ansible_architecture is not search('arm')
 
-    - name: Install Docker for ARM
+    - name: Install, configure and start Docker for ARM
       become: yes
       import_role:
         name: geerlingguy.docker_arm

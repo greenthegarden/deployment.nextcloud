@@ -1,6 +1,8 @@
 ---
 
-- hosts: nextcloud_instances
+- name: Install and configure Nextcloud on nodes within the nextcloud_instances group
+  
+  hosts: nextcloud_instances
 
   vars:
 
@@ -8,9 +10,28 @@
     nextcloud_volume_data: nextcloud_data
     nextcloud_env_file: /tmp/nextcloud.env
 
+    nextcloud_service_name: nextcloud
+    nextcloud_service_ports_http: 8080
+    nextcloud_service_ports: [
+      { label: http, value: "{{ nextcloud_service_ports_http }}" }
+    ]
+
+    nextcloud_image_name: nextcloud
+    nextcloud_image_tag: latest
+
   pre_tasks:
 
   tasks:
+
+    - name: "Unregister {{ nextcloud_service_name }} service with the local consul agent"
+      consul:
+        host: "{{ ansible_host }}"
+        service_name: "{{ nextcloud_service_name }}-{{ item.value }}"
+        service_port: "{{ item.value | int }}"
+        service_address: "{{ ansible_host }}"
+        state: absent
+      loop: "{{ nextcloud_service_ports }}"
+      when: service_consul_running
 
     - name: Create environmental file
       template:
@@ -21,6 +42,7 @@
       become: yes
       docker_volume:
         name: "{{ nextcloud_volume_data }}"
+        force: yes
         state: present
 
     - name: Start Nextcloud container
@@ -35,3 +57,13 @@
         state: started
         volumes:
           - "{{ nextcloud_volume_data }}:/var/www/html"
+
+    - name: "Register {{ nextcloud_service_name }} service with the local consul agent"
+      consul:
+        host: "{{ ansible_host }}"
+        service_name: "{{ nextcloud_service_name }}-{{ item.value }}"
+        service_port: "{{ item.value | int }}"
+        service_address: "{{ ansible_host }}"
+        state: present
+      loop: "{{ nextcloud_service_ports }}"
+      when: service_consul_running
