@@ -7,7 +7,7 @@ VAGRANTFILE_API_VERSION = '2'
 
 # Require the YAML module and Azure provider plugin
 require 'yaml'
-require 'vagrant-azure'
+# require 'vagrant-azure'
 
 # Load settings from vagrant.yml or vagrant.yml.dist
 current_dir = File.dirname(File.expand_path(__FILE__))
@@ -31,17 +31,11 @@ vb_settings = config_file['configs'][config_file['configs']['use']]['vb']
 controller_node_base = "controller-node"
 services_node_base = "services-node"
 
+puts "Project name: %s" % project_name
 puts "Using configurations for %s" % config_file['configs']['use']
 puts "controller_node settings: %s" % controller_node_settings
 puts "services_node settngs: %s" % services_node_settings
 puts "services_node_count: %s" % services_node_count
-
-# Define scripts
-def generate_node_ip(vb_settings, id)
-  node_ip_range = vb_settings['ip_range']
-  node_ip_id = Integer(id)
-  node_ip = [ node_ip_range, node_ip_id ].join('.')
-end
 
 # Create and configure the specified systems
 Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
@@ -66,10 +60,10 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   # # Create nodes for services to be deployed on
   (1..services_node_count).each do |i|
 
-    services_node_name = services_node_settings['name'] + "-" + String(i)
+    services_node_name = config_file['configs']['project'] + "-" + services_node_settings['name'] + "-" + String(i)
     puts "Services node name set to %s" % services_node_name
 
-    services_node_machine = services_node_base + "-" + String(i)
+    services_node_machine = services_node_name
 
     config.vm.define services_node_machine do |services_node|
 
@@ -81,11 +75,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 
         services_node.vm.box = services_node_settings['vb']['box']
 
-        services_node_ip_base = Integer(services_node_settings['vb']['external_ip_base']) + (i-1)
-        services_node_ip = generate_node_ip(vb_settings, services_node_ip_base)
-        # puts "Services node IP address set to %s" % services_node_ip
-
-        services_node.vm.network :private_network, ip: "172.16.1.#{i + 100}"
+        services_node.vm.network "private_network", ip: "172.16.2.#{i + 100}"
 
         vb.name = services_node_name
         vb.cpus = services_node_settings['vb']['resources']['cpus']
@@ -111,7 +101,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
         chmod -R 600 /home/vagrant/.ssh/config
         ", privileged: false
 
-      services_node.vm.post_up_message = "Service node spun up!"
+      services_node.vm.post_up_message = "Services node spun up!"
 
     end
 
@@ -120,11 +110,11 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 
   # Create a machine to run Ansible
 
-  controller_node_machine = controller_node_base
+  controller_node_machine = config_file['configs']['project'] + "-" + controller_node_settings['name']
 
   config.vm.define controller_node_machine do |controller_node|
 
-    controller_node_name = controller_node_settings['name']
+    controller_node_name = controller_node_machine
 
     # Specify the hostname of the machine
     controller_node.vm.hostname = controller_node_name
@@ -139,16 +129,12 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 
       controller_node.vm.box = controller_node_settings['vb']['box']
 
-      controller_node_ip_base = Integer(controller_node_settings['vb']['external_ip_base'])
-      controller_node_ip = generate_node_ip(vb_settings, controller_node_ip_base)
-      # puts "Controller node IP address set to %s" % controller_node_ip
-
-      controller_node.vm.network :private_network, ip: "172.16.1.10"
+      controller_node.vm.network "private_network", ip: "172.16.2.10"
 
       vb.name = controller_node_name
       vb.memory = controller_node_settings['vb']['resources']['memory']
       vb.cpus = controller_node_settings['vb']['resources']['cpus']
-      vb.linked_clone = true
+      # vb.linked_clone = true
       # vb.customize ["modifyvm", :id, "--ioapic", "on"]
       # Enable NAT hosts DNS resolver
       # vb.customize ["modifyvm", :id, "--natdnshostresolver1", "on"]
@@ -168,7 +154,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     controller_node.vm.provision :ansible_local do |ansible|
 
       ansible.install_mode = "pip"
-      ansible.version = "2.9.5"
+      # ansible.version = "2.9.5"
       ansible.compatibility_mode = "2.0"
       ansible.install = true
       ansible.limit = "all"

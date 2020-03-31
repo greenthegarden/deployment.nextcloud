@@ -20,7 +20,7 @@
     postgres_image_name: postgres
     postgres_image_tag: latest
 
-    deploy_pgadmin: yes
+    deploy_pgadmin: no
     
     pgadmin_service_name: pgadmin
     pgadmin_service_ports_http: 8888
@@ -39,13 +39,11 @@
       consul:
         host: "{{ consul_client_address }}"
         service_name: "{{ postgres_service_name }}-{{ item.value }}"
-        service_port: "{{ item.value | int }}"
-        # service_address: "{{ ansible_host }}"
         state: absent
       loop: "{{ postgres_service_ports }}"
       when: service_consul_running
 
-    - name: Stop PostgreSQL container
+    - name: Remove PostgreSQL container
       become: yes
       docker_container:
         name: "{{ postgres_service_name }}"
@@ -59,11 +57,18 @@
         recreate: "{{ postrgres_volume_recreate }}"
         state: present
 
+    - name: "Pull image {{ postgres_image_name }}:{{ postgres_image_tag }}"
+      become: yes
+      docker_image:
+        name: "{{ postgres_image_name }}"
+        tag: "{{ postgres_image_tag }}"
+        source: pull
+
     - name: Start PostgreSQL container
       become: yes
       docker_container:
         name: "{{ postgres_service_name }}"
-        image: postgres
+        image: "{{ postgres_image_name }}:{{ postgres_image_tag }}"
         env:
           POSTGRES_PASSWORD: "{{ postgres_admin_password }}"
           POSTGRES_USER: "{{ postgres_admin_user }}"
@@ -80,7 +85,7 @@
         host: "{{ consul_client_address }}"
         service_name: "{{ postgres_service_name }}-{{ item.value }}"
         service_port: "{{ item.value }}"
-        # service_address: "{{ ansible_host }}"
+        service_address: "{{ ansible_host }}"
         state: present
       loop: "{{ postgres_service_ports }}"
       when: service_consul_running
@@ -93,30 +98,42 @@
             host: "{{ consul_client_address }}"
             service_name: "{{ pgadmin_service_name }}-{{ item.value }}"
             service_port: "{{ item.value }}"
-            # service_address: "{{ ansible_host }}"
             state: absent
           loop: "{{ pgadmin_service_ports }}"
           when: service_consul_running
+
+        - name: "Pull image {{ pgadmin_image_name }}:{{ pgadmin_image_tag }}"
+          become: yes
+          docker_image:
+            name: "{{ pgadmin_image_name }}"
+            tag: "{{ pgadmin_image_tag }}"
+            source: pull
 
         - name: Start pgAdmin container
           become: yes
           docker_container:
             name: pgadmin
             image: dpage/pgadmin4
+            dns_search_domains:
+              - service.consul
+            dns_servers:
+              - "{{ consul_bind_address }}"
             env:
               PGADMIN_DEFAULT_EMAIL: "{{ postgres_admin_user }}@mynextcloud.com"
               PGADMIN_DEFAULT_PASSWORD: "{{ postgres_admin_password }}"
             published_ports:
               - 8888:80
             recreate: yes
+            restart_policy: always
             state: started
+          register: pgadmin_service_launched
 
         - name: "Register {{ pgadmin_service_name }} service with the local consul agent"
           consul:
             host: "{{ consul_client_address }}"
             service_name: "{{ pgadmin_service_name }}-{{ item.value }}"
             service_port: "{{ item.value | int }}"
-            # service_address: "{{ ansible_host }}"
+            service_address: "{{ ansible_host }}"
             state: present
           loop: "{{ pgadmin_service_ports }}"
           when: service_consul_running

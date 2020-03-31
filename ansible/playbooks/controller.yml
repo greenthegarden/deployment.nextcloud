@@ -1,0 +1,38 @@
+---
+
+- name: Configure controller-node
+
+  hosts: controller-node
+
+  vars:
+
+    packages: [
+      sshpass,
+      unzip,
+      dnsutils,
+    ]
+
+    python_modules: [
+      { name: netaddr },
+    ]
+
+  tasks:
+
+    - name: Update host packages
+      become: yes
+      import_role:
+        name: greenthegarden.configure-host
+        tasks_from: run-package-update
+      run_once: yes
+      tags:
+        - base
+        - update
+
+    - name: Install dependencies
+      become: yes
+      import_role:
+        name: greenthegarden.configure-host
+        tasks_from: install-dependencies
+      tags:
+        - base
+        - dependencies

@@ -30,13 +30,11 @@
       consul:
         host: "{{ consul_client_address }}"
         service_name: "{{ nextcloud_service_name }}-{{ item.value }}"
-        service_port: "{{ item.value | int }}"
-        # service_address: "{{ ansible_host }}"
         state: absent
       loop: "{{ nextcloud_service_ports }}"
       when: service_consul_running
 
-    - name: Stop Nextcloud container
+    - name: Remove Nextcloud container
       become: yes
       docker_container:
         name: "{{ nextcloud_service_name }}"
@@ -55,25 +53,38 @@
         recreate: "{{ nextcloud_volume_recreate }}"
         state: present
 
+    - name: "Pull image {{ nextcloud_image_name }}:{{ nextcloud_image_tag }}"
+      become: yes
+      docker_image:
+        name: "{{ nextcloud_image_name }}"
+        tag: "{{ nextcloud_image_tag }}"
+        source: pull
+
     - name: Start Nextcloud container
       become: yes
       docker_container:
         name: "{{ nextcloud_service_name }}"
-        image: nextcloud
-        # env_file: "{{ nextcloud_env_file }}"
+        image: "{{ nextcloud_image_name }}:{{ nextcloud_image_tag }}"
+        dns_search_domains:
+          - service.consul
+        dns_servers:
+          - "{{ consul_bind_address }}"
+        env_file: "{{ nextcloud_env_file }}"
         published_ports:
           - 8080:80
         recreate: yes
+        restart_policy: always
         state: started
         volumes:
           - "{{ nextcloud_volume_data }}:/var/www/html"
+      register: nextcloud_service_launched
 
     - name: "Register {{ nextcloud_service_name }} service with the local consul agent"
       consul:
         host: "{{ consul_client_address }}"
         service_name: "{{ nextcloud_service_name }}-{{ item.value }}"
         service_port: "{{ item.value | int }}"
-        # service_address: "{{ ansible_host }}"
+        service_address: "{{ ansible_host }}"
         state: present
       loop: "{{ nextcloud_service_ports }}"
       when: service_consul_running

@@ -26,8 +26,6 @@
       consul:
         host: "{{ consul_client_address }}"
         service_name: "{{ redis_service_name }}-{{ item.value }}"
-        service_port: "{{ item.value | int }}"
-        # service_address: "{{ ansible_host }}"
         state: absent
       loop: "{{ redis_service_ports }}"
       when: service_consul_running
@@ -46,25 +44,38 @@
         recreate: "{{ redis_volume_recreate }}"
         state: present
 
+    - name: "Pull image {{ redis_image_name }}:{{ redis_image_tag }}"
+      become: yes
+      docker_image:
+        name: "{{ redis_image_name }}"
+        tag: "{{ redis_image_tag }}"
+        source: pull
+
     - name: Start Redis container
       become: yes
       docker_container:
         name: "{{ redis_service_name }}"
-        image: redis
+        image: "{{ redis_image_name }}:{{ redis_image_tag }}"
         command: redis-server --appendonly yes
+        dns_search_domains:
+          - service.consul
+        dns_servers:
+          - "{{ consul_bind_address }}"
         published_ports :
-          - 6379:6379
+          - "{{ redis_service_ports_http }}:6379"
         recreate: yes
+        restart_policy: always
         state: started
         volumes:
           - "{{ redis_volume_data }}:/data"
+      register: redis_service_launched
 
     - name: "Register {{ redis_service_name }} service with the local consul agent"
       consul:
         host: "{{ consul_client_address }}"
         service_name: "{{ redis_service_name }}-{{ item.value }}"
         service_port: "{{ item.value | int }}"
-        # service_address: "{{ ansible_host }}"
+        service_address: "{{ ansible_host }}"
         state: present
       loop: "{{ redis_service_ports }}"
       when: service_consul_running

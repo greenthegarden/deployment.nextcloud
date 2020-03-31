@@ -1,7 +1,9 @@
 ---
 
+# Ensure dependencies are installed on controller
+- import_playbook: playbooks/controller.yml
 # Ensure all host tasks are performed first, set of common tasks
-# - import_playbook: playbooks/base.yml
+- import_playbook: playbooks/base.yml
 # Run role to install and set up the Redis on hosts specified as redis_instances
 - import_playbook: playbooks/services/redis.yml
 # Run role to install and set up Postgres and pgAdmin on hosts specified as postgres_instances

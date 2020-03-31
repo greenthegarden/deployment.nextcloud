@@ -9,7 +9,7 @@ all:
       ansible_connection: local
     nextcloud-vm:
       # ansible_host: services-node-1
-      ansible_host: 172.16.1.101
+      ansible_host: 172.16.2.101
       ansible_ssh_private_key_file: /home/vagrant/.ssh/id_ed25519
       ansible_ssh_user: vagrant
       consul_node_role: bootstrap
@@ -23,18 +23,19 @@ all:
     # do not change as used to provision consul on all services_nodes
     consul_group_name: services_nodes
 
-    service_consul_running: yes
+    service_consul_running: no
 
     # consul_datacenter: nextcloud
     consul_iface: eth1
-    # consul_recursors: ['172.16.1.254']
-    # consul_dnsmasq_servers: ['/dc1/172.16.1.254']
-    consul_join_wan: ['172.16.1.101']
-    consul_advertise_address_wan: '172.16.1.101'
+    consul_bind_address: '172.16.2.101'
+    consul_recursors: ['192.168.1.254']
+    consul_dnsmasq_servers: ['192.168.1.254', '8.8.8.8', '8.8.4.4']
+    consul_join_wan: ['172.16.2.101']
+    consul_advertise_address_wan: '172.16.2.101'
     consul_client_address: "{{ ansible_host }}"
     consul_dnsmasq_enable: yes
     consul_connect_enabled: yes
-    consul_version: '1.7.1'
+    consul_version: '1.7.2'
     # consul_install_upgrade: yes
 
   children:

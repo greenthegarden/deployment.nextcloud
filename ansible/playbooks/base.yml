@@ -77,3 +77,30 @@
       import_role:
         name: geerlingguy.docker_arm
       when: ansible_architecture is search('arm')
+
+    - name: Get running services
+      import_role:
+        name: greenthegarden.configure-host
+        tasks_from: get-host-services
+      tags:
+        - base
+        - services
+
+    - name: Ensure required services are running
+      fail:
+        msg: "Service {{ item.label }} is not running"
+      loop:
+        - { label: Consul, name: consul.service }
+        - { label: Docker, name: docker.service }
+        # - { label: Node-Exporter, name: node_exporter.service }
+      when: ( ansible_facts.services[ item.name ] is not defined ) or ( ansible_facts.services[ item.name ].state != 'running' )
+      tags:
+        - base
+        - services
+
+    - name: Set consul running fact
+      set_fact:
+        service_consul_running: yes
+      tags:
+        - base
+        - services
